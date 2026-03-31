@@ -3,20 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EasyCallSheets Web</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://realcoolclint.github.io https://cdnjs.cloudflare.com data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://realcoolclint.github.io; font-src 'self' https://fonts.gstatic.com data:; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com blob:; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self';">
+    <title>Manifest — Tranquility Suite</title>
+    <link rel="stylesheet" href="https://realcoolclint.github.io/tranquility-core/tranquility-core.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>EasyCallSheets</h1>
-        
-        <div class="app-container">
-            <!-- Formulaire à gauche -->
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- MERCURY OPENING                                     -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div id="mercury-opening">
+        <canvas id="mercury-grid"></canvas>
+        <div class="mercury-center">
+            <svg id="mercury-radar" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+                <circle id="mercury-radar-circle" cx="130" cy="130" r="115"/>
+            </svg>
+            <video id="mercury-patch" src="assets/ambiance-manifest.mp4" autoplay muted playsinline loop></video>
+            <div id="mercury-version"></div>
+        </div>
+    </div>
+    <div id="mercury-flash"></div>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- APP SHELL                                           -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div id="app-shell">
+
+        <!-- HEADER -->
+        <div class="app-header">
+            <video class="patch-header" src="assets/ambiance-manifest.mp4" autoplay muted playsinline loop></video>
+            <div class="app-title-block">
+                <span class="app-title">MANIFEST</span>
+                <span class="app-subtitle">Feuilles de service</span>
+            </div>
+            <div id="app-version-display" class="app-version-badge"></div>
+        </div>
+
+        <!-- APP BODY -->
+        <div class="app-body">
+
+            <!-- FORMULAIRE -->
             <div class="form-section">
                 <form id="callSheetForm">
+
                     <div class="form-group">
                         <h2>Format et Date</h2>
                         <div class="form-item">
@@ -104,8 +134,6 @@
                         <div class="form-item">
                             <button type="button" id="manageManagersButton" class="secondary-button">Gérer les responsables projet</button>
                         </div>
-                        
-                        <!-- NOUVEAUX CHAMPS RESPONSABLE VIDÉO -->
                         <div class="form-item" style="margin-top: 20px;">
                             <label for="videoManagerName">Responsable vidéo</label>
                             <div class="autocomplete-wrapper">
@@ -123,20 +151,30 @@
                     </div>
 
                     <div class="button-group">
-                        <button type="button" id="previewButton">Aperçu</button>
-                        <button type="button" id="generatePdfButton">Générer PDF</button>
+                        <button type="button" id="previewButton" class="secondary-button btn-apercu">Aperçu</button>
+                        <button type="button" id="generatePdfButton" class="primary-button">Générer PDF</button>
                     </div>
-                </form>
-            </div>
 
-            <!-- Aperçu à droite -->
+                </form>
+            </div><!-- /.form-section -->
+
+            <!-- APERÇU -->
             <div class="preview-section" id="previewSection">
+                <div class="preview-empty-state" id="preview-empty-state">
+                    <div class="empty-icon">📋</div>
+                    <p>Remplissez le formulaire<br>et cliquez sur <strong>Aperçu</strong></p>
+                </div>
                 <div id="previewContent"></div>
             </div>
-        </div>
-    </div>
 
-    <!-- Modal de gestion des responsables projet -->
+        </div><!-- /.app-body -->
+    </div><!-- /#app-shell -->
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- MODALES                                             -->
+    <!-- ═══════════════════════════════════════════════════ -->
+
+    <!-- Modal responsables projet -->
     <div id="managersModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -160,10 +198,10 @@
                     <h3>Importer depuis un fichier CSV</h3>
                     <div class="form-item">
                         <label for="csvFile">Fichier CSV</label>
-                        <input type="file" id="csvFile" accept=".csv" />
+                        <input type="file" id="csvFile" accept=".csv">
                         <small>Format attendu : nom,téléphone (une ligne par responsable)</small>
                     </div>
-                    <button type="button" id="importCsvButton" class="primary-button">Importer</button>
+                    <button type="button" id="importCsvButton" class="secondary-button">Importer</button>
                 </div>
                 <div class="managers-list">
                     <h3>Responsables sauvegardés</h3>
@@ -176,7 +214,7 @@
         </div>
     </div>
 
-    <!-- Modal de gestion des responsables vidéo -->
+    <!-- Modal responsables vidéo -->
     <div id="videoManagersModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -200,10 +238,10 @@
                     <h3>Importer depuis un fichier CSV</h3>
                     <div class="form-item">
                         <label for="videoManagerCsvFile">Fichier CSV</label>
-                        <input type="file" id="videoManagerCsvFile" accept=".csv" />
+                        <input type="file" id="videoManagerCsvFile" accept=".csv">
                         <small>Format attendu : nom,téléphone (une ligne par responsable)</small>
                     </div>
-                    <button type="button" id="importVideoManagerCsvButton" class="primary-button">Importer</button>
+                    <button type="button" id="importVideoManagerCsvButton" class="secondary-button">Importer</button>
                 </div>
                 <div class="managers-list">
                     <h3>Responsables vidéo sauvegardés</h3>
@@ -216,7 +254,7 @@
         </div>
     </div>
 
-    <!-- Modal de gestion des formats -->
+    <!-- Modal formats -->
     <div id="formatsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -224,7 +262,7 @@
                 <span class="modal-close" id="formatsModalClose">&times;</span>
             </div>
             <div class="modal-body">
-                <div class="add-format-form">
+                <div class="add-format-form add-manager-form">
                     <h3>Ajouter un format</h3>
                     <div class="form-item">
                         <label for="newFormatName">Nom du format</label>
@@ -236,12 +274,12 @@
                     <h3>Importer depuis un fichier CSV</h3>
                     <div class="form-item">
                         <label for="formatsCsvFile">Fichier CSV</label>
-                        <input type="file" id="formatsCsvFile" accept=".csv" />
+                        <input type="file" id="formatsCsvFile" accept=".csv">
                         <small>Format attendu : nom (une ligne par format)</small>
                     </div>
-                    <button type="button" id="importFormatsCsvButton" class="primary-button">Importer</button>
+                    <button type="button" id="importFormatsCsvButton" class="secondary-button">Importer</button>
                 </div>
-                <div class="formats-list">
+                <div class="managers-list">
                     <h3>Formats sauvegardés</h3>
                     <div style="margin-bottom: 15px;">
                         <button type="button" id="exportFormatsCsvButton" class="secondary-button">Exporter en CSV</button>
@@ -252,8 +290,94 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- SCRIPTS                                             -->
+    <!-- ═══════════════════════════════════════════════════ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="script.js"></script>
+
+    <!-- Version dynamique + Mercury Opening -->
+    <script>
+    (function () {
+        // ── Version ──────────────────────────────────────
+        var APP_VERSION = 'V1.30.03.26';
+        var verEl = document.getElementById('mercury-version');
+        if (verEl) verEl.textContent = APP_VERSION;
+        var badgeEl = document.getElementById('app-version-display');
+        if (badgeEl) badgeEl.textContent = APP_VERSION;
+
+        // ── Dot grid canvas ──────────────────────────────
+        var canvas = document.getElementById('mercury-grid');
+        if (canvas) {
+            canvas.width  = window.innerWidth;
+            canvas.height = window.innerHeight;
+            var ctx     = canvas.getContext('2d');
+            var spacing = 28;
+            var r       = 0.8;
+            ctx.fillStyle = 'rgba(255,255,255,0.12)';
+            for (var x = 0; x < canvas.width; x += spacing) {
+                for (var y = 0; y < canvas.height; y += spacing) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        var opening   = document.getElementById('mercury-opening');
+        var radar     = document.getElementById('mercury-radar');
+        var radarCirc = document.getElementById('mercury-radar-circle');
+        var patch     = document.getElementById('mercury-patch');
+        var version   = document.getElementById('mercury-version');
+        var flash     = document.getElementById('mercury-flash');
+        var appShell  = document.getElementById('app-shell');
+
+        // ── Séquence ─────────────────────────────────────
+        setTimeout(function () {
+            if (canvas) canvas.classList.add('visible');
+        }, 180);
+
+        setTimeout(function () {
+            if (radar)     radar.classList.add('visible');
+            if (radarCirc) radarCirc.classList.add('animate');
+        }, 350);
+
+        setTimeout(function () {
+            if (patch) patch.classList.add('visible');
+        }, 550);
+
+        setTimeout(function () {
+            if (version) version.classList.add('visible');
+        }, 1650);
+
+        // ── Flash → reveal ────────────────────────────────
+        setTimeout(function () {
+            if (flash) flash.classList.add('flash-in');
+            setTimeout(function () {
+                if (opening) opening.style.display = 'none';
+                if (flash) {
+                    flash.classList.remove('flash-in');
+                    flash.classList.add('flash-out');
+                }
+                if (appShell) appShell.classList.add('ready');
+                setTimeout(function () {
+                    if (flash) flash.style.display = 'none';
+                }, 500);
+            }, 230);
+        }, 4000);
+
+        // ── Empty state aperçu ────────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            var previewBtn  = document.getElementById('previewButton');
+            var emptyState  = document.getElementById('preview-empty-state');
+            if (previewBtn && emptyState) {
+                previewBtn.addEventListener('click', function () {
+                    emptyState.style.display = 'none';
+                });
+            }
+        });
+    })();
+    </script>
+
 </body>
 </html>
