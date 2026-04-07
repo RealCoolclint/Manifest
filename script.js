@@ -99,7 +99,7 @@
             if (p.avatar) {
                 avatarEl = document.createElement('img');
                 avatarEl.className = 'ps-avatar';
-                avatarEl.src = 'https://raw.githubusercontent.com/RealCoolclint/tranquility-avatars/main/' + p.avatar;
+                avatarEl.src = p.avatar;
                 avatarEl.alt = p.firstName;
                 avatarEl.onerror = function () {
                     var fb = _makeFallback(p);
@@ -149,9 +149,7 @@
                     profileName:      profile.firstName,
                     profileInitiales: profile.initiales,
                     profileRole:      profile.role,
-                    profileAvatar:    profile.avatar
-                        ? 'https://raw.githubusercontent.com/RealCoolclint/tranquility-avatars/main/' + profile.avatar
-                        : null,
+                    profileAvatar: profile.avatar || null,
                     profileColor:     profile.color || 'var(--accent)',
                     connectedAt:      Date.now(),
                     expiresAt:        Date.now() + SESSION_DURATION_MS
