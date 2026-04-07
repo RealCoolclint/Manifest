@@ -178,21 +178,25 @@
     }
 
     function _updateHeader(session) {
-        var avatarBtn = document.getElementById('profile-avatar-btn');
-        var avatarImg = document.getElementById('profile-avatar-img');
-        var avatarFb  = document.getElementById('profile-avatar-fallback');
-        if (!avatarBtn) return;
-        avatarBtn.style.display = 'flex';
-        avatarBtn.style.alignItems = 'center';
-        avatarBtn.style.justifyContent = 'center';
-        var freshBtn = avatarBtn.cloneNode(true);
-        avatarBtn.parentNode.replaceChild(freshBtn, avatarBtn);
+        var btn = document.getElementById('profile-avatar-btn');
+        if (!btn) return;
+
+        // Shallow clone pour reset les listeners, enfants déplacés manuellement
+        var freshBtn = btn.cloneNode(false);
+        while (btn.firstChild) freshBtn.appendChild(btn.firstChild);
+        btn.parentNode.replaceChild(freshBtn, btn);
+
+        freshBtn.style.display = 'flex';
+        freshBtn.style.alignItems = 'center';
+        freshBtn.style.justifyContent = 'center';
+
         freshBtn.addEventListener('click', function () {
             WebProfileSelector.changeProfile();
         });
-        // Avatar ou fallback
-        var img = freshBtn.querySelector('#profile-avatar-img');
-        var fb  = freshBtn.querySelector('#profile-avatar-fallback');
+
+        var img = document.getElementById('profile-avatar-img');
+        var fb  = document.getElementById('profile-avatar-fallback');
+
         if (session.profileAvatar) {
             if (img) { img.src = session.profileAvatar; img.style.display = 'block'; }
             if (fb)  { fb.style.display = 'none'; }
