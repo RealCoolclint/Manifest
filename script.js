@@ -1,3 +1,259 @@
+/* ═══════════════════════════════════════════════════════
+   WEBPROFILESELECTOR — Manifest
+   Tranquility Suite · Phase Mercury
+   Clé localStorage : ts_session_manifest
+   APP_KEY : manifest
+═══════════════════════════════════════════════════════ */
+(function () {
+    var APP_KEY      = 'manifest';
+    var SESSION_KEY  = 'ts_session_manifest';
+    var PROFILES_URL = 'https://realcoolclint.github.io/tranquility-core/profiles-public.json';
+    var SESSION_DURATION_MS = 8 * 60 * 60 * 1000; // 8h
+
+    var _profiles       = [];
+    var _selectedId     = null;
+    var _activeSession  = null;
+
+    window.WebProfileSelector = {
+        onSessionReady: null,
+
+        init: function () {
+            var screen = document.getElementById('profile-selector-screen');
+            if (!screen) return;
+
+            // Vérifier session existante
+            var existing = _loadSession();
+            if (existing && existing.profileId) {
+                _activeSession = existing;
+                window._activeSession = existing;
+                screen.style.display = 'none';
+                if (typeof WebProfileSelector.onSessionReady === 'function') {
+                    WebProfileSelector.onSessionReady(existing);
+                }
+                return;
+            }
+
+            // Afficher le sélecteur
+            _show();
+            _syncProfiles();
+        },
+
+        changeProfile: function () {
+            _selectedId = null;
+            _show();
+        }
+    };
+
+    function _show() {
+        var screen = document.getElementById('profile-selector-screen');
+        var appShell = document.getElementById('app-shell');
+        if (screen) {
+            screen.style.cssText = 'position:fixed;inset:0;z-index:2000;background:var(--bg-primary);display:flex;align-items:center;justify-content:center;flex-direction:column;';
+        }
+        if (appShell) appShell.classList.remove('ready');
+        _renderGrid();
+    }
+
+    function _hide() {
+        var screen = document.getElementById('profile-selector-screen');
+        if (screen) screen.style.display = 'none';
+    }
+
+    async function _syncProfiles() {
+        var cached = _loadCache();
+        if (cached && cached.length) {
+            _profiles = cached;
+            _renderGrid();
+        }
+        try {
+            var res = await fetch(PROFILES_URL);
+            if (!res.ok) throw new Error('fetch failed');
+            var data = await res.json();
+            _profiles = data;
+            _saveCache(data);
+            _hideBadgeOffline();
+            _renderGrid();
+        } catch (e) {
+            if (!_profiles.length) {
+                _profiles = [];
+                _showBadgeOffline();
+            } else {
+                _showBadgeOffline();
+            }
+            _renderGrid();
+        }
+    }
+
+    function _renderGrid() {
+        var grid = document.getElementById('ps-grid');
+        var btn  = document.getElementById('ps-connect-btn');
+        if (!grid) return;
+        grid.innerHTML = '';
+        _profiles.forEach(function (p) {
+            var card = document.createElement('div');
+            card.className = 'ps-card' + (_selectedId === p.id ? ' selected' : '');
+            card.dataset.id = p.id;
+
+            var avatarEl;
+            if (p.avatar) {
+                avatarEl = document.createElement('img');
+                avatarEl.className = 'ps-avatar';
+                avatarEl.src = 'https://raw.githubusercontent.com/RealCoolclint/tranquility-avatars/main/' + p.avatar;
+                avatarEl.alt = p.firstName;
+                avatarEl.onerror = function () {
+                    var fb = _makeFallback(p);
+                    avatarEl.parentNode.replaceChild(fb, avatarEl);
+                };
+            } else {
+                avatarEl = _makeFallback(p);
+            }
+            card.appendChild(avatarEl);
+
+            var nameEl = document.createElement('div');
+            nameEl.className = 'ps-name';
+            nameEl.textContent = p.firstName;
+            card.appendChild(nameEl);
+
+            if (p.role) {
+                var roleEl = document.createElement('div');
+                roleEl.className = 'ps-role';
+                var isAdmin = p.role === 'admin';
+                if (isAdmin) {
+                    roleEl.innerHTML = '<span style="display:inline-block;background:transparent;color:#3b82f6;border:1px solid #3b82f6;border-radius:3px;padding:1px 6px;font-family:Lato,sans-serif;font-weight:700;font-size:9px;letter-spacing:1px;text-transform:uppercase;">ADMIN</span>';
+                } else {
+                    roleEl.textContent = p.role;
+                }
+                card.appendChild(roleEl);
+            }
+
+            card.addEventListener('click', function () {
+                _selectedId = p.id;
+                _renderGrid();
+                if (btn) btn.style.display = 'block';
+            });
+
+            grid.appendChild(card);
+        });
+
+        // Bouton SE CONNECTER
+        if (btn) {
+            var freshBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(freshBtn, btn);
+            freshBtn.style.display = _selectedId ? 'block' : 'none';
+            freshBtn.addEventListener('click', function () {
+                var profile = _profiles.find(function (p) { return p.id === _selectedId; });
+                if (!profile) return;
+                var session = {
+                    profileId:        profile.id,
+                    profileName:      profile.firstName,
+                    profileInitiales: profile.initiales,
+                    profileRole:      profile.role,
+                    profileAvatar:    profile.avatar
+                        ? 'https://raw.githubusercontent.com/RealCoolclint/tranquility-avatars/main/' + profile.avatar
+                        : null,
+                    profileColor:     profile.color || 'var(--accent)',
+                    connectedAt:      Date.now(),
+                    expiresAt:        Date.now() + SESSION_DURATION_MS
+                };
+                _saveSession(session);
+                _activeSession = session;
+                window._activeSession = session;
+                _hide();
+                var appShell = document.getElementById('app-shell');
+                if (appShell) appShell.classList.add('ready');
+                _updateHeader(session);
+                if (typeof WebProfileSelector.onSessionReady === 'function') {
+                    WebProfileSelector.onSessionReady(session);
+                }
+            });
+        }
+    }
+
+    function _makeFallback(p) {
+        var fb = document.createElement('div');
+        fb.className = 'ps-avatar-fallback';
+        fb.textContent = p.initiales || p.firstName.slice(0, 2).toUpperCase();
+        fb.style.backgroundColor = p.color || 'var(--accent)';
+        return fb;
+    }
+
+    function _updateHeader(session) {
+        var avatarBtn = document.getElementById('profile-avatar-btn');
+        var avatarImg = document.getElementById('profile-avatar-img');
+        var avatarFb  = document.getElementById('profile-avatar-fallback');
+        if (!avatarBtn) return;
+        avatarBtn.style.display = 'flex';
+        avatarBtn.style.alignItems = 'center';
+        avatarBtn.style.justifyContent = 'center';
+        var freshBtn = avatarBtn.cloneNode(true);
+        avatarBtn.parentNode.replaceChild(freshBtn, avatarBtn);
+        freshBtn.addEventListener('click', function () {
+            WebProfileSelector.changeProfile();
+        });
+        // Avatar ou fallback
+        var img = freshBtn.querySelector('#profile-avatar-img');
+        var fb  = freshBtn.querySelector('#profile-avatar-fallback');
+        if (session.profileAvatar) {
+            if (img) { img.src = session.profileAvatar; img.style.display = 'block'; }
+            if (fb)  { fb.style.display = 'none'; }
+        } else {
+            if (img) img.style.display = 'none';
+            if (fb)  {
+                fb.textContent = session.profileInitiales || session.profileName.slice(0,2).toUpperCase();
+                fb.style.backgroundColor = session.profileColor || 'var(--accent)';
+                fb.style.display = 'flex';
+            }
+        }
+    }
+
+    function _showBadgeOffline() {
+        var b = document.getElementById('ps-offline-badge');
+        if (b) b.style.display = 'block';
+    }
+    function _hideBadgeOffline() {
+        var b = document.getElementById('ps-offline-badge');
+        if (b) b.style.display = 'none';
+    }
+
+    function _loadSession() {
+        try {
+            var raw = localStorage.getItem(SESSION_KEY);
+            if (!raw) return null;
+            var s = JSON.parse(raw);
+            if (s.expiresAt && Date.now() > s.expiresAt) {
+                localStorage.removeItem(SESSION_KEY);
+                return null;
+            }
+            return s;
+        } catch (e) { return null; }
+    }
+    function _saveSession(s) {
+        try { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); } catch (e) {}
+    }
+    function _loadCache() {
+        try {
+            var raw = localStorage.getItem(SESSION_KEY + '_cache');
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) { return null; }
+    }
+    function _saveCache(data) {
+        try { localStorage.setItem(SESSION_KEY + '_cache', JSON.stringify(data)); } catch (e) {}
+    }
+
+    // Déclencheur après Mercury Opening
+    window.onMercuryComplete = function () {
+        var appShell = document.getElementById('app-shell');
+        if (appShell) appShell.classList.add('ready');
+        WebProfileSelector.onSessionReady = function (session) {
+            setTimeout(function () {
+                _updateHeader(session);
+            }, 0);
+        };
+        WebProfileSelector.init();
+    };
+
+})();
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialisation des éléments DOM
     const form = document.getElementById('callSheetForm');

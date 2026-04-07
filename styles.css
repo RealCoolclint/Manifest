@@ -859,3 +859,80 @@ button {
     .edit-button,
     .delete-button { flex: 1; text-align: center; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   WEBPROFILESELECTOR
+═══════════════════════════════════════════════════════════ */
+
+#profile-selector-screen {
+    display: none;
+}
+#profile-selector-screen.active {
+    display: flex !important;
+}
+
+.ps-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 16px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    width: 130px;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    user-select: none;
+}
+.ps-card:hover {
+    border-color: var(--border-active);
+    background: var(--bg-tertiary);
+}
+.ps-card.selected {
+    border-color: var(--accent);
+    background: var(--bg-tertiary);
+}
+
+.ps-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.ps-avatar-fallback {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: #fff;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.ps-name {
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    text-align: center;
+}
+.ps-role {
+    font-family: 'Lato', sans-serif;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+#profile-avatar-btn:hover {
+    border-color: var(--accent) !important;
+}
