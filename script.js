@@ -41,6 +41,7 @@
         changeProfile: function () {
             _selectedId = null;
             _show();
+            _syncProfiles();
         }
     };
 
