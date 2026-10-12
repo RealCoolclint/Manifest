@@ -308,6 +308,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const logoImg = new Image();
     logoImg.src = 'logo_etudiant.png';
     
+    function getLogoDataUrl() {
+        try {
+            if (!(logoImg.complete && logoImg.naturalWidth > 0)) {
+                return null;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = logoImg.naturalWidth;
+            canvas.height = logoImg.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(logoImg, 0, 0);
+            return canvas.toDataURL('image/png');
+        } catch (e) {
+            return null;
+        }
+    }
+    
     // Définir la date du jour par défaut
     document.getElementById('date').valueAsDate = new Date();
     
@@ -1690,7 +1706,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Obtenir le chemin absolu du logo
-            const logoPath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1) + 'logo_etudiant.png';
+            const logoPath = new URL('logo_etudiant.png', window.location.href).href;
+            const logoSrc = getLogoDataUrl() || logoPath;
             
             // Générer le HTML complet avec les styles intégrés
             const printContent = `
@@ -1755,7 +1772,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <img src="${logoPath}" alt="Logo L'Etudiant" class="logo" onerror="this.style.display='none'">
+                            <img src="${logoSrc}" alt="Logo L'Etudiant" class="logo" onerror="this.style.display='none'">
                             <h1>FEUILLE DE SERVICE - ${formatDate(date)}</h1>
                         </div>
                         <br><br>
